@@ -56,7 +56,6 @@ client.loop_start()
 
 if choice == 1:
     img_path = 'demo.jpg'
-
     img = preprocess(Image.open(img_path))
     print(img.shape)
     data = {'choice': choice,'data': img.tolist()}
