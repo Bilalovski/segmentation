@@ -19,6 +19,7 @@ def on_message(clientName, userdata, message):
         data2 = result[1].tolist()
         data3 = result[2].tolist()
         data4 = result[3].tolist()
+
         data = {'choice':choice, 'data1': data1, 'data2': data2, 'data3': data3, 'data4': data4}
         payload = json.dumps(data)
         client.publish("seg_inference_out", payload)

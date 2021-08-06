@@ -46,7 +46,7 @@ def display_objdetect_image(image, boxes, labels, scores, masks, score_threshold
     boxes /= ratio
 
     _, ax = plt.subplots(1, figsize=(12,9))
-
+    print(masks.shape)
     image = np.array(image)
 
     for mask, box, label, score in zip(masks, boxes, labels, scores):
@@ -95,5 +95,6 @@ boxes = result[0]
 labels = result[1]
 scores = result[2]
 masks = result[3]
+print(masks.shape)
 
 display_objdetect_image(img, boxes, labels, scores, masks)
