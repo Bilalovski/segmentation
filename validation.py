@@ -36,7 +36,6 @@ def main():
         if display:
             print("will display image")
             _, ax = plt.subplots(1, figsize=(12, 9))
-
             ax.imshow(img)
             plt.show()
             display = False
