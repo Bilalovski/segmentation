@@ -3,6 +3,10 @@ import json
 
 import paho.mqtt.client as paho
 from PIL import Image
+import pickle
+import time
+
+from pydust import core
 
 published=False
 
@@ -46,6 +50,18 @@ def preprocess(image):
     return image
 
 
+def receive(arg):
+    image= pickle.loads(arg)
+    if choice == 1:
+        img = preprocess(image)
+        data = {'choice': choice, 'data': img.tolist()}
+        payload = json.dumps(data)
+        client.publish("seg_preprocess_out", payload, qos=0)
+
+    while not published:
+        pass
+
+
 broker = "127.0.0.1"
 client = paho.Client("seg_preprocessor")
 client.on_connect=on_connect
@@ -54,13 +70,20 @@ client.connect(broker)
 choice = 1
 client.loop_start()
 
-if choice == 1:
-    img_path = 'demo.jpg'
-    img = preprocess(Image.open(img_path))
-    print(img.shape)
-    data = {'choice': choice,'data': img.tolist()}
-    payload = json.dumps(data)
-    client.publish("seg_preprocess_out", payload, qos=0)
+dust = core.Core("seg_sub", "./modules")
 
-while not published:
-    pass
+# start a background thread responsible for tasks that shouls always be running in the same thread
+dust.cycle_forever()
+# load the core, this includes reading the libraries in the modules directory to check addons and transports are available
+dust.setup()
+# set the path to the configuration file
+dust.set_configuration_file("configuration.json")
+# connects all channels
+dust.connect()
+time.sleep(1)
+# add a message listener on the subscribe-tcp channel. The callback function takes a bytes-like object as argument containing the payload of the message
+dust.register_listener("seg_image", receive)
+# dust.register_listener("subscribe-mqtt", lambda payload: print("Received payload with %d bytes" % len(payload)))
+
+while True:
+    time.sleep(1)

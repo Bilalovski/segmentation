@@ -1,0 +1,58 @@
+{
+  "_templates": {
+    "example-template": {
+      "addons": [
+
+      ],
+      "transport": {
+        "type": "mqtt",
+        "host": "broker.mqttdashboard.com",
+        "port": 1883
+      }
+    }
+  },
+  "seg_pub": {
+    "links": {
+      "channels": {
+        "publish-mqtt": {
+          "_template": "example-template",
+          "transport": {
+            "publish": true,
+            "topic": "input_seg",
+            "qos": 0
+          }
+        },
+        "pub_postProcess_seg": {
+                "_template": "example-template",
+                "transport": {
+                  "publish": true,
+                  "topic": "output_seg",
+                  "qos": 0
+          }
+        }
+      }
+    }
+  },
+  "seg_sub": {
+    "links": {
+      "channels": {
+        "seg_image": {
+          "_template": "example-template",
+          "transport": {
+            "publish": false,
+            "topic": "input_seg",
+            "qos": 0
+          }
+        },
+        "check_output": {
+          "_template": "example-template",
+          "transport": {
+            "publish": false,
+            "topic": "output_seg",
+            "qos": 0
+          }
+        }
+      }
+    }
+  }
+}

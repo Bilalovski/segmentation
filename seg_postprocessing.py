@@ -1,13 +1,41 @@
 import json
+import pickle
 import time
 import cv2
 import paho.mqtt.client as paho
 from matplotlib import pyplot as plt, patches
 import numpy as np
 from PIL import Image, ImageDraw, ImageColor
+from pydust import core
+
 disp=False
 classes = [line.rstrip('\n') for line in open('labels.txt')]
 
+def send_dust(payload):
+    dust = core.Core("seg_pub", "./modules")
+
+    # start a background thread responsible for tasks that shouls always be running in the same thread
+    dust.cycle_forever()
+
+    # load the core, this includes reading the libraries in the modules directory to check addons and transports are available
+    dust.setup()
+
+    # set the path to the configuration file
+    dust.parse_configuration_file("configuration.json")
+
+    # connects all channels
+    dust.connect()
+    time.sleep(1)
+    # declare a bytes-like payload object
+    # publishes the payload to the given channel (as defined by the configuration file)
+    dust.publish("pub_postProcess_seg", payload)
+    time.sleep(1)
+
+    # disconnects all channels and flushes the addon stack and transport.
+    dust.disconnect()
+
+    # stops the background thread started by cycleForever() and wait until the thread has finished its tasks before exiting the application
+    dust.cycle_stop()
 
 def display_objdetect_image(image, boxes, labels, scores, masks, score_threshold=0.7):
     # Resize boxes
@@ -51,9 +79,10 @@ def display_objdetect_image(image, boxes, labels, scores, masks, score_threshold
         rect = patches.Rectangle((box[0], box[1]), box[2] - box[0], box[3] - box[1], linewidth=1, edgecolor='b', facecolor='none')
         ax.annotate(classes[label] + ':' + str(np.round(score, 2)), (box[0], box[1]), color='w', fontsize=12)
         ax.add_patch(rect)
-
-    ax.imshow(image)
-    plt.show()
+    bytearr = pickle.dumps(image)
+    send_dust(bytearr)
+    #ax.imshow(image)
+    #plt.show()
 
 
 
